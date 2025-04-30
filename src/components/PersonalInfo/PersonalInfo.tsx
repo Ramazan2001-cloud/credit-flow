@@ -2,9 +2,11 @@ import React, { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { Form, Input, Button, DatePicker } from "antd";
-import InputMask from "react-input-mask";
+import { Form, Input, Button, DatePicker, Row, Col } from "antd";
+import { MaskedInput } from "antd-mask-input";
 import dayjs from "dayjs";
+
+import './PersonalInfo.scss';
 
 type PersonalInfoForm = {
     firstName: string;
@@ -21,7 +23,7 @@ const schema = yup.object().shape({
     phone: yup
         .string()
         .required("Введите номер телефона")
-        .matches(/^\+77\d{9}$/, "Формат: +77XXXXXXXXX"),
+        .matches(/^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/, "Формат: +7 (XXX) XXX-XX-XX"),
     email: yup.string().required("Введите email").email("Некорректный email"),
 });
 
@@ -32,6 +34,7 @@ type Props = {
 
 const PersonalInfo: React.FC<Props> = ({ onNext, savedData }) => {
     const {
+        getValues,
         control,
         handleSubmit,
         setValue,
@@ -46,8 +49,9 @@ const PersonalInfo: React.FC<Props> = ({ onNext, savedData }) => {
             Object.entries(savedData).forEach(([key, value]) => {
                 setValue(key as keyof PersonalInfoForm, value || "");
             });
+            console.log('getValues', getValues);
         }
-    }, [savedData, setValue]);
+    }, [getValues, savedData, setValue]);
 
     const onSubmit = (data: PersonalInfoForm) => {
         localStorage.setItem("creditFormData", JSON.stringify(data));
@@ -55,64 +59,84 @@ const PersonalInfo: React.FC<Props> = ({ onNext, savedData }) => {
     };
 
     return (
-        <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
-            <Form.Item label="Имя" validateStatus={errors.firstName ? "error" : ""} help={errors.firstName?.message}>
-                <Controller
-                    name="firstName"
-                    control={control}
-                    render={({ field }) => <Input {...field} />}
-                />
-            </Form.Item>
-
-            <Form.Item label="Фамилия" validateStatus={errors.lastName ? "error" : ""} help={errors.lastName?.message}>
-                <Controller
-                    name="lastName"
-                    control={control}
-                    render={({ field }) => <Input {...field} />}
-                />
-            </Form.Item>
-
-            <Form.Item label="Дата рождения" validateStatus={errors.birthDate ? "error" : ""} help={errors.birthDate?.message}>
-                <Controller
-                    name="birthDate"
-                    control={control}
-                    render={({ field }) => (
-                        <DatePicker
-                            {...field}
-                            format="YYYY-MM-DD"
-                            value={field.value ? dayjs(field.value) : null}
-                            onChange={(date) => field.onChange(date?.format("YYYY-MM-DD"))}
-                            style={{ width: "100%" }}
+        <Form layout="vertical" onFinish={handleSubmit(onSubmit)} className="personal-info">
+            <Row gutter={[20,0]}>
+                <Col span={12}>
+                    <Form.Item label="Имя" validateStatus={errors.firstName ? "error" : ""} help={errors.firstName?.message}>
+                        <Controller
+                            name="firstName"
+                            control={control}
+                            render={({ field }) => <Input {...field} />}
                         />
-                    )}
-                />
-            </Form.Item>
+                    </Form.Item>
+                </Col>
+                <Col span={12}>
+                    <Form.Item label="Фамилия" validateStatus={errors.lastName ? "error" : ""} help={errors.lastName?.message}>
+                        <Controller
+                            name="lastName"
+                            control={control}
+                            render={({ field }) => <Input {...field} />}
+                        />
+                    </Form.Item>
+                </Col>
+            </Row>
 
-            <Form.Item label="Телефон" validateStatus={errors.phone ? "error" : ""} help={errors.phone?.message}>
-                <Controller
-                    name="phone"
-                    control={control}
-                    render={({ field }) => (
-                        <InputMask mask="+77999999999" {...field}>
-                            {(inputProps) => <input {...inputProps} className="ant-input" />}
-                        </InputMask>
-                    )}
-                />
-            </Form.Item>
+            <Row gutter={[20,0]}>
+                <Col span={12}>
+                    <Form.Item label="Дата рождения" validateStatus={errors.birthDate ? "error" : ""} help={errors.birthDate?.message}>
+                        <Controller
+                            name="birthDate"
+                            control={control}
+                            render={({ field }) => (
+                                <DatePicker
+                                    {...field}
+                                    format="YYYY-MM-DD"
+                                    value={field.value ? dayjs(field.value) : null}
+                                    onChange={(date) => field.onChange(date?.format("YYYY-MM-DD"))}
+                                    style={{ width: "100%" }}
+                                />
+                            )}
+                        />
+                    </Form.Item>
+                </Col>
+                <Col span={12}>
+                    <Form.Item label="Телефон" validateStatus={errors.phone ? "error" : ""} help={errors.phone?.message}>
+                        <Controller
+                            name="phone"
+                            control={control}
+                            render={({ field }) => (
+                                <MaskedInput
+                                    mask="+7 (000) 000-00-00"
+                                    {...field}
+                                    placeholder="+7 (___) ___-__-__"
+                                />
+                            )}
+                        />
+                    </Form.Item>
+                </Col>
+            </Row>
+                
+            <Row gutter={[20, 0]} align="middle">
+                <Col span={18}>
+                    <Form.Item
+                        label="Email"
+                        validateStatus={errors.email ? "error" : ""}
+                        help={errors.email?.message}
+                    >
+                        <Controller
+                            name="email"
+                            control={control}
+                            render={({ field }) => <Input {...field} />}
+                        />
+                    </Form.Item>
+                </Col>
+                <Col span={6} style={{ display: 'flex', alignItems: 'center' }}>
+                    <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
+                        Далее
+                    </Button>
+                </Col>
+            </Row>
 
-            <Form.Item label="Email" validateStatus={errors.email ? "error" : ""} help={errors.email?.message}>
-                <Controller
-                    name="email"
-                    control={control}
-                    render={({ field }) => <Input {...field} />}
-                />
-            </Form.Item>
-
-            <Form.Item>
-                <Button type="primary" htmlType="submit">
-                    Далее
-                </Button>
-            </Form.Item>
         </Form>
     );
 };

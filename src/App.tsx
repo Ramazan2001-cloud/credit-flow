@@ -1,5 +1,8 @@
 import PersonalInfo from './components/PersonalInfo/PersonalInfo';
 import './App.css';
+// import AddressInfo from './components/AddressInfo/AddressInfo';
+
+const title = ['Персональная информация', 'Адресная информация', 'Финансовая информация'];
 
 function App() {
 	const handleNext = (data: any) => {
@@ -10,8 +13,10 @@ function App() {
 		<>
 			<h1>Персональная информация</h1>
 			<PersonalInfo onNext={handleNext} />
+			{/* <h1>Адресная информация</h1>
+			<AddressInfo onNext={handleNext} /> */}
 		</>
 	)
 }
 
-export default App
+export default App;
