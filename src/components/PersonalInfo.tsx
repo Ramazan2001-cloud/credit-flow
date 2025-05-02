@@ -5,16 +5,7 @@ import * as yup from "yup";
 import { Form, Input, Button, DatePicker, Row, Col } from "antd";
 import { MaskedInput } from "antd-mask-input";
 import dayjs from "dayjs";
-
-import './PersonalInfo.scss';
-
-type PersonalInfoForm = {
-    firstName: string;
-    lastName: string;
-    birthDate: string;
-    phone: string;
-    email: string;
-};
+import { PersonalInfoForm } from "../types/ICreditFlow";
 
 const schema = yup.object().shape({
     firstName: yup.string().required("Введите имя"),
@@ -28,7 +19,7 @@ const schema = yup.object().shape({
 });
 
 type Props = {
-    onNext: (data: PersonalInfoForm) => void;
+    onNext: (step: number) => void;
     savedData?: Partial<PersonalInfoForm>;
 };
 
@@ -49,17 +40,16 @@ const PersonalInfo: React.FC<Props> = ({ onNext, savedData }) => {
             Object.entries(savedData).forEach(([key, value]) => {
                 setValue(key as keyof PersonalInfoForm, value || "");
             });
-            console.log('getValues', getValues);
         }
     }, [getValues, savedData, setValue]);
 
     const onSubmit = (data: PersonalInfoForm) => {
-        localStorage.setItem("creditFormData", JSON.stringify(data));
-        onNext(data);
+        localStorage.setItem("personalInfoData", JSON.stringify(data));
+        onNext(1);
     };
 
     return (
-        <Form layout="vertical" onFinish={handleSubmit(onSubmit)} className="personal-info">
+        <Form layout="vertical" onFinish={handleSubmit(onSubmit)} className="form-data">
             <Row gutter={[20,0]}>
                 <Col span={12}>
                     <Form.Item label="Имя" validateStatus={errors.firstName ? "error" : ""} help={errors.firstName?.message}>
@@ -136,7 +126,6 @@ const PersonalInfo: React.FC<Props> = ({ onNext, savedData }) => {
                     </Button>
                 </Col>
             </Row>
-
         </Form>
     );
 };
